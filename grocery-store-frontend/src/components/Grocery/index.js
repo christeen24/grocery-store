@@ -20,7 +20,7 @@ export default class Grocery extends Component {
         axios.get("http://localhost:8000/groceries").then((response) => {
             if (response.status === 200) {
             this.setState({
-                groceries: response.data ? response.data : [],
+                groceries: response.data.data ? response.data.data : [],
             });
             }
             if (

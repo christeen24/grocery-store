@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Grocery;
+use Illuminate\Support\Facades\Validator;
 
 class GroceryController extends Controller
 {
+
+    private $status = 200;
+
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +19,11 @@ class GroceryController extends Controller
     public function index()
     {
         $groceries = Grocery::all();
-        return response()->json($groceries);
+        if (count($groceries) > 0) {
+            return response()->json(["status" => $this->status, "success" => true, "count" => count($groceries), "data" => $groceries]);
+        } else {
+            return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! no record found"]);
+        }
     }
 
     /**
@@ -36,23 +44,45 @@ class GroceryController extends Controller
      */
     public function store(Request $request)
     {
-        // $grocery = new Grocery([
-        //     'name' => $request->get('name'),
-        //     'quantity' => $request->get('quantity'),
-        //     'price' => $request->get('price')
-        // ]);
-        // $grocery->save();
-
-        // return response()->json('Grocery added successfully.');
-
-        $request->validate([
+        $validator = Validator::make($request->all(),
+        [
             'name' => 'required',
             'quantity' => 'required',
-            'price' => 'required' //optional if you want this to be required
+            'price' => 'required'
         ]);
-        $grocery = Grocery::create($request->all());
-        return response()->json(['message'=> 'Grocery created', 
-        'grocery' => $grocery]);
+        
+        if($validator->fails()) {
+            return response()->json(["status" => "failed", "validation_errors" => $validator->errors()]);
+        }
+
+        $id = $request->id;
+        $groceryArray = array(
+            "name" => $request->name,
+            "quantity" => $request->quantity,
+            "price" => $request->price
+        );
+
+        if($id !="") {           
+            $grocery = Grocery::find($id);
+            if(!is_null($grocery)){
+                $updated_status = Grocery::where("id", $id)->update($groceryArray);
+                if($updated_status == 1) {
+                    return response()->json(["status" => $this->status, "success" => true, "message" => "grocery detail updated successfully"]);
+                }
+                else {
+                    return response()->json(["status" => "failed", "message" => "Whoops! failed to update, try again."]);
+                }               
+            }                   
+        }
+        else {
+            $grocery = Grocery::create($groceryArray);
+            if(!is_null($grocery)) {            
+                return response()->json(["status" => $this->status, "success" => true, "message" => "grocery record created successfully", "data" => $grocery]);
+            }    
+            else {
+                return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! failed to create."]);
+            }
+        }
     }
 
     /**
@@ -61,9 +91,16 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Grocery $grocery)
+    public function show($id)
     {
-        return $grocery;
+        $grocery = Grocery::find($id);
+
+        if(!is_null($grocery)) {
+            return response()->json(["status" => $this->status, "success" => true, "data" => $grocery]);
+        }
+        else {
+            return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! no Grocery found"]);
+        }
     }
 
     /**
@@ -85,31 +122,8 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Grocery $grocery)
+    public function update(Request $request)
     {
-        // $grocery = Grocery::find($id);
-        // $grocery->name = $request->get('name');
-        // $grocery->quantity = $request->get('quantity');
-        // $grocery->price = $request->get('price');
-        // $grocery->save();
-
-
-        // return response()->json('Grocery Updated Successfully.');
-    
-        $request->validate([
-            'name' => 'required',
-            'quantity' => 'required',
-            'price' => 'required' //optional if you want this to be required
-        ]);
-        $grocery->name = $request->name();
-        $grocery->quantity = $request->quantity();
-        $grocery->price = $request->price();
-        $grocery->save();
-        
-        return response()->json([
-            'message' => 'Grocery updated!',
-            'grocery' => $grocery
-        ]);
     
     }
 
@@ -119,12 +133,21 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Grocery $grocery)
+    public function destroy($id)
     {
-        // $grocery = Grocery::find($id);
-        $grocery->delete();
-
-
-      return response()->json('Grocery Deleted Successfully.');
+        $grocery = Grocery::find($id);
+        if(!is_null($grocery)) {
+            $delete_status = Grocery::where("id", $id)->delete();
+            if($delete_status == 1) {
+                return response()->json(["status" => $this->status, "success" => true, "message" => "grocery record deleted successfully"]);
+            }
+            else{
+                return response()->json(["status" => "failed", "message" => "failed to delete, please try again"]);
+            }
+        }
+        else {
+            return response()->json(["status" => "failed", "message" => "Whoops! no grocery found with this id"]);
+        }
+        
     }
 }

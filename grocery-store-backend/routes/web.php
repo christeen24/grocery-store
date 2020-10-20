@@ -2,6 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GroceryController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,14 +18,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('groceries', 'App\Http\Controllers\GroceryController');
+Route::get('groceries', 'App\Http\Controllers\GroceryController@index');
 
-// Route::get('/groceries', 'App\Http\Controllers\GroceryController@index')->name('groceries.index');
+Route::post('groceries','App\Http\Controllers\GroceryController@store');
 
-// Route::post('/groceries', 'App\Http\Controllers\GroceryController@store')->name('groceries.store');
+Route::get('groceries/{id}', 'App\Http\Controllers\GroceryController@show');
 
-// Route::get('/groceries/{grocery}', 'App\Http\Controllers\GroceryController@show')->name('groceries.show');
-
-// Route::put('/groceries/{grocery}', 'App\Http\Controllers\GroceryController@update')->name('groceries.update');
-
-// Route::delete('/groceries/{grocery}', 'App\Http\Controllers\GroceryController@destory')->name('groceries.destroy');
+Route::delete('groceries/{id}', 'App\Http\Controllers\GroceryController@destroy');
