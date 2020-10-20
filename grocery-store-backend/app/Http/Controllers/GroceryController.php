@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Grocery;
 
 class GroceryController extends Controller
 {
@@ -35,14 +36,23 @@ class GroceryController extends Controller
      */
     public function store(Request $request)
     {
-        $grocery = new Grocery([
-            'name' => $request->get('name'),
-            'quantity' => $request->get('quantity'),
-            'price' => $request->get('price')
-        ]);
-        $grocery->save();
+        // $grocery = new Grocery([
+        //     'name' => $request->get('name'),
+        //     'quantity' => $request->get('quantity'),
+        //     'price' => $request->get('price')
+        // ]);
+        // $grocery->save();
 
-        return response()->json('Grocery added successfully.');
+        // return response()->json('Grocery added successfully.');
+
+        $request->validate([
+            'name' => 'required',
+            'quantity' => 'required',
+            'price' => 'required' //optional if you want this to be required
+        ]);
+        $grocery = Grocery::create($request->all());
+        return response()->json(['message'=> 'Grocery created', 
+        'grocery' => $grocery]);
     }
 
     /**
@@ -51,9 +61,9 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Grocery $grocery)
     {
-        //
+        return $grocery;
     }
 
     /**
@@ -75,16 +85,32 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Grocery $grocery)
     {
-        $grocery = Grocery::find($id);
-        $grocery->name = $request->get('name');
-        $grocery->quantity = $request->get('quantity');
-        $grocery->price = $request->get('price');
+        // $grocery = Grocery::find($id);
+        // $grocery->name = $request->get('name');
+        // $grocery->quantity = $request->get('quantity');
+        // $grocery->price = $request->get('price');
+        // $grocery->save();
+
+
+        // return response()->json('Grocery Updated Successfully.');
+    
+        $request->validate([
+            'name' => 'required',
+            'quantity' => 'required',
+            'price' => 'required' //optional if you want this to be required
+        ]);
+        $grocery->name = $request->name();
+        $grocery->quantity = $request->quantity();
+        $grocery->price = $request->price();
         $grocery->save();
-
-
-        return response()->json('Grocery Updated Successfully.');
+        
+        return response()->json([
+            'message' => 'Grocery updated!',
+            'grocery' => $grocery
+        ]);
+    
     }
 
     /**
@@ -93,9 +119,9 @@ class GroceryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Grocery $grocery)
     {
-        $grocery = Grocery::find($id);
+        // $grocery = Grocery::find($id);
         $grocery->delete();
 
 
