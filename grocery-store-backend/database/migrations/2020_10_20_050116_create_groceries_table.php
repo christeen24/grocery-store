@@ -14,7 +14,10 @@ class CreateGroceriesTable extends Migration
     public function up()
     {
         Schema::create('groceries', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('quantity');
+            $table->double('price', 8, 2);
             $table->timestamps();
         });
     }
