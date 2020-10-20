@@ -13,7 +13,8 @@ class GroceryController extends Controller
      */
     public function index()
     {
-        //
+        $groceries = Grocery::all();
+        return response()->json($groceries);
     }
 
     /**
@@ -34,7 +35,14 @@ class GroceryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $grocery = new Grocery([
+            'name' => $request->get('name'),
+            'quantity' => $request->get('quantity'),
+            'price' => $request->get('price')
+        ]);
+        $grocery->save();
+
+        return response()->json('Grocery added successfully.');
     }
 
     /**
@@ -56,7 +64,8 @@ class GroceryController extends Controller
      */
     public function edit($id)
     {
-        //
+        $grocery = Grocery::find($id);
+        return response()->json($grocery);
     }
 
     /**
@@ -68,7 +77,14 @@ class GroceryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $grocery = Grocery::find($id);
+        $grocery->name = $request->get('name');
+        $grocery->quantity = $request->get('quantity');
+        $grocery->price = $request->get('price');
+        $grocery->save();
+
+
+        return response()->json('Grocery Updated Successfully.');
     }
 
     /**
@@ -79,6 +95,10 @@ class GroceryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $grocery = Grocery::find($id);
+        $grocery->delete();
+
+
+      return response()->json('Grocery Deleted Successfully.');
     }
 }
